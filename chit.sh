@@ -116,7 +116,7 @@ getThemeVariable() {
 
   value=""
 
-  current_theme_name=$(getSavedSetting "${CONFIG_DIR}"/current_theme.txt)
+  current_theme_name=$(getSavedSetting "${CONFIG_DIR}"/current_theme)
   full_path_to_theme_conf="${CONFIG_DIR}/theme_definitions/${current_theme_name}.conf"
 
   while read line
@@ -190,7 +190,7 @@ setThemeVariables() {
   # 2. Use the theme's .conf file to set all the env variables
   theme_name="${1}"
 
-  setSavedSetting "${CONFIG_DIR}"/current_theme.txt "${theme_name}"
+  setSavedSetting "${CONFIG_DIR}"/current_theme "${theme_name}"
 
   exportVars
 
