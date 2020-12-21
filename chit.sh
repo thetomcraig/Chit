@@ -5,7 +5,29 @@ SCRIPT_DIR="$( cd "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
 KITTY_THEME_CONF_PATH="${HOME}/.config/kitty/theme.conf"
 
 source "${SCRIPT_DIR}"/saved_settings.sh
-source "${SCRIPT_DIR}"/themeIsApplied.sh
+
+getSavedSetting() {
+  setting_file_name="${1}"
+
+  saved_setting=""
+
+  setting_file="${setting_file_name}"
+  # If setting file is present, read the first line
+  if [ -f "${setting_file}" ]; then
+    saved_setting=$(sed -n 1p "${setting_file}")
+  fi
+
+  echo "${saved_setting}"
+}
+
+setSavedSetting() {
+  setting_file_name="${1}"
+  setting_value="${2}"
+
+  setting_file="${setting_file_name}"
+
+  echo "${setting_value}" > "${setting_file}"
+}
 
 listThemes() {
   # List all the theme options
@@ -64,13 +86,47 @@ setiTermTheme() {
   fi
 }
 
+kittyThemeIsApplied() {
+  desiredThemePath=$1
+
+  themeColors=(
+  background
+  foreground
+  color0
+  # color1
+  # color2
+  # color3
+  # color4
+  # color5
+  # color6
+  # color7
+  # color8
+  # color9
+  # color10
+  # color11
+  # color12
+  # color13
+  # color14
+  # color15
+  )
+
+  for color in "${themeColors[@]}"; do
+    desiredThemeColor=$(grep -w "${color}" "${desiredThemePath}" | sed 's/ //g' | tr '[:upper:]' '[:lower:]')
+    currentThemeColor=$(kitty @ get-colors | grep -w "${color}" | sed 's/ //g'| tr '[:upper:]' '[:lower:]')
+    if [[ "${desiredThemeColor}" != "${currentThemeColor}" ]]; then
+      return 1 # False
+    fi
+  done
+
+ return 0 # True
+}
 
 setThemeVariables() {
-  # 1. Set the current theme, using set_saved_setting
+  # 1. Set the current theme, using setSavedSetting
   # 2. Use the theme's .conf file to set all the env variables
   theme_name="${1}"
 
-  set_saved_setting "${SCRIPT_DIR}"/current_theme.txt "${theme_name}"
+  setSavedSetting "${SCRIPT_DIR}"/current_theme.txt "${theme_name}"
 
   exportVars
 
@@ -93,7 +149,7 @@ getThemeVariable() {
 
   value=""
 
-  current_theme_name=$(get_saved_setting "${SCRIPT_DIR}"/current_theme.txt)
+  current_theme_name=$(getSavedSetting "${SCRIPT_DIR}"/current_theme.txt)
   full_path_to_theme_conf="${SCRIPT_DIR}/theme_definitions/${current_theme_name}.conf"
 
   while read line
@@ -125,7 +181,7 @@ shellInit() {
       if ! [ -z "${CHIT_KITTY_THEME_CONF_FILE_PATH}" ]; then
         echo "it's not empty"
         echo "${CHIT_KITTY_THEME_CONF_FILE_PATH}"
-        if ! $(themeIsApplied "${CHIT_KITTY_THEME_CONF_FILE_PATH}"); then
+        if ! $(kittyThemeIsApplied "${CHIT_KITTY_THEME_CONF_FILE_PATH}"); then
           kitty @ set-colors "${CHIT_KITTY_THEME_CONF_FILE_PATH}"
         fi
       fi
@@ -134,20 +190,39 @@ shellInit() {
 }
 
 
+helpStringFunction() {
+  echo "OPTIONS AND ARGUMENTS:"
+  echo "-h|--help:
+          Show this help message"
+  echo "-i|--shell-init:
+          Function to be called on shell init (.zshrc, .bash_profile, etc.)"
+  echo "-l|--list-themes:
+          List available themes"
+  echo "-s|--set-theme:
+          Set the current theme"
+  echo "-g|--get-theme-variable:
+          Given a variable, return it's value in the current theme"
+}
+
 # Handle input to this script
 case $1 in
+  -h*|--help)
+    helpStringFunction
+  ;;
   -i|--shell-init)
     shellInit
   ;;
   -l|--list-themes)
     listThemes $2
   ;;
-
-  -s|--set-themes)
+  -s|--set-theme)
     setThemeVariables $2
   ;;
-
   -g|--get-theme-variable)
     getThemeVariable $2
+  ;;
+  *)
+    echo "Option not recognized ($1);"
+    helpStringFunction
   ;;
 esac
