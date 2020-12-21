@@ -4,8 +4,6 @@ SCRIPT_DIR="$( cd "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
 
 KITTY_THEME_CONF_PATH="${HOME}/.config/kitty/theme.conf"
 
-source "${SCRIPT_DIR}"/saved_settings.sh
-
 getSavedSetting() {
   setting_file_name="${1}"
 
@@ -191,16 +189,16 @@ shellInit() {
 
 
 helpStringFunction() {
-  echo "OPTIONS AND ARGUMENTS:"
-  echo "-h|--help:
+  echo "chit:"
+  echo "  -h|--help:
           Show this help message"
-  echo "-i|--shell-init:
+  echo "  -i|--shell-init:
           Function to be called on shell init (.zshrc, .bash_profile, etc.)"
-  echo "-l|--list-themes:
+  echo "  -l|--list-themes:
           List available themes"
-  echo "-s|--set-theme:
+  echo "  -s|--set-theme:
           Set the current theme"
-  echo "-g|--get-theme-variable:
+  echo "  -g|--get-theme-variable:
           Given a variable, return it's value in the current theme"
 }
 
@@ -223,6 +221,7 @@ case $1 in
   ;;
   *)
     echo "Option not recognized ($1);"
+    echo ""
     helpStringFunction
   ;;
 esac
