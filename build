@@ -1,3 +1,4 @@
 #!/usr/bin/env bash
 
 
+mv chit.sh chit
