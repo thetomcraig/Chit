@@ -1,9 +1,15 @@
 #!/usr/bin/env bash
 
-SCRIPT_DIR="$( cd "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
-
+# Homebrew build/install steps will make and populate this folder
+CONFIG_DIR= configLocation=${HOME}/.config/chit
+# Must have a line in the kitty conf file to use this one
+# TODO: Add readme step for this, and for other kitty seettings
 KITTY_THEME_CONF_PATH="${HOME}/.config/kitty/theme.conf"
 
+
+##################
+# SETTINGS UTILS #
+##################
 getSavedSetting() {
   setting_file_name="${1}"
 
@@ -27,17 +33,10 @@ setSavedSetting() {
   echo "${setting_value}" > "${setting_file}"
 }
 
-listThemes() {
-  # List all the theme options
-  # Each defined in a .conf file
-  theme_definitions=($(ls ${SCRIPT_DIR}/theme_definitions/))
-  for i in "${theme_definitions[@]}"
-  do
-    echo "${i}"
-  done
-}
 
-
+##################
+# TERMINAL UTILS #
+##################
 getTerminalEmulator() {
   # Name of the current terminal emulator application
   terminal_emulator=$(osascript -e 'tell application "System Events"' \
@@ -46,7 +45,34 @@ getTerminalEmulator() {
   echo "${terminal_emulator}"
 }
 
+kittyThemeIsApplied() {
+  # Check the colors being used in the kitty session
+  # If the do not match the theme set by chit reurn false
+  # Used to manually set kitty colors on shell start
+  desiredThemePath=$1
 
+  themeColors=(
+  background
+  foreground
+  color0
+  # Other colors could be checked, but takes too much time
+  )
+
+  for color in "${themeColors[@]}"; do
+    desiredThemeColor=$(grep -w "${color}" "${desiredThemePath}" | sed 's/ //g' | tr '[:upper:]' '[:lower:]')
+    currentThemeColor=$(kitty @ get-colors | grep -w "${color}" | sed 's/ //g'| tr '[:upper:]' '[:lower:]')
+    if [[ "${desiredThemeColor}" != "${currentThemeColor}" ]]; then
+      return 1 # False
+    fi
+  done
+
+ return 0 # True
+}
+
+
+#########################
+# CHIT HELPER FUNCTIONS #
+#########################
 setTerminalTheme() {
   # Set the colors of the current TTY and Terminal Emulator
   theme_name="${1}"
@@ -69,76 +95,19 @@ setTerminalTheme() {
   esac
 }
 
-
 setiTermTheme() {
   scheme=$1
 
   if [ -n "$TMUX" ]; then
     # If inside tmux, need to use the applescript to
     # Set all the colors
-    osascript ${SCRIPT_DIR}/iterm/change_iterm_session.scpt "${scheme}" &> /dev/null
+    osascript ${CONFIG_DIR}/iterm/change_iterm_session.scpt "${scheme}" &> /dev/null
   else
     # Otherwise, we can use the iTerm escape sequence
       # TODO this check doesnt work... weird
     echo -e "\033]1337;SetColors=preset=${scheme}\a"
   fi
 }
-
-kittyThemeIsApplied() {
-  desiredThemePath=$1
-
-  themeColors=(
-  background
-  foreground
-  color0
-  # color1
-  # color2
-  # color3
-  # color4
-  # color5
-  # color6
-  # color7
-  # color8
-  # color9
-  # color10
-  # color11
-  # color12
-  # color13
-  # color14
-  # color15
-  )
-
-  for color in "${themeColors[@]}"; do
-    desiredThemeColor=$(grep -w "${color}" "${desiredThemePath}" | sed 's/ //g' | tr '[:upper:]' '[:lower:]')
-    currentThemeColor=$(kitty @ get-colors | grep -w "${color}" | sed 's/ //g'| tr '[:upper:]' '[:lower:]')
-    if [[ "${desiredThemeColor}" != "${currentThemeColor}" ]]; then
-      return 1 # False
-    fi
-  done
-
- return 0 # True
-}
-
-setThemeVariables() {
-  # 1. Set the current theme, using setSavedSetting
-  # 2. Use the theme's .conf file to set all the env variables
-  theme_name="${1}"
-
-  setSavedSetting "${SCRIPT_DIR}"/current_theme.txt "${theme_name}"
-
-  exportVars
-
-  setTerminalTheme "${theme_name}"
-}
-
-exportVars() {
-  export CHIT_ITERM_SCHEME=$(getThemeVariable "iterm_scheme")
-  export CHIT_KITTY_THEME_CONF_FILE_PATH=$(getThemeVariable "kitty_theme_path")
-  export CHIT_VIM_COLORSCHEME=$(getThemeVariable "vim_colorscheme")
-  export CHIT_BAT_THEME=$(getThemeVariable "bat_theme")
-  export CHIT_VIM_BEFORE=$(getThemeVariable "vim_before")
-}
-
 
 getThemeVariable() {
   # Given a variable, read the .conf file for the current theme
@@ -147,8 +116,8 @@ getThemeVariable() {
 
   value=""
 
-  current_theme_name=$(getSavedSetting "${SCRIPT_DIR}"/current_theme.txt)
-  full_path_to_theme_conf="${SCRIPT_DIR}/theme_definitions/${current_theme_name}.conf"
+  current_theme_name=$(getSavedSetting "${CONFIG_DIR}"/current_theme.txt)
+  full_path_to_theme_conf="${CONFIG_DIR}/theme_definitions/${current_theme_name}.conf"
 
   while read line
   do
@@ -164,6 +133,19 @@ getThemeVariable() {
   echo "${value}"
 }
 
+exportVars() {
+  # Export all the CHIT_ variables, so they're in the current env
+  export CHIT_ITERM_SCHEME=$(getThemeVariable "iterm_scheme")
+  export CHIT_KITTY_THEME_CONF_FILE_PATH=$(getThemeVariable "kitty_theme_path")
+  export CHIT_VIM_COLORSCHEME=$(getThemeVariable "vim_colorscheme")
+  export CHIT_BAT_THEME=$(getThemeVariable "bat_theme")
+  export CHIT_VIM_BEFORE=$(getThemeVariable "vim_before")
+}
+
+
+#######################
+# MAIN CHIT FUNCTIONS #
+#######################
 shellInit() {
   # To be run on shell start (.bash_profile .zshrc etc.)
   exportVars
@@ -187,9 +169,36 @@ shellInit() {
   esac
 }
 
+listThemes() {
+  # List all the themes
+  # Each defined in a .conf file
+  example_definitions=($(ls ${CONFIG_DIR}/theme_definitions/examples))
+  for i in "${example_definitions[@]}"
+  do
+    echo "${i}"
+  done
+
+  theme_definitions=($(ls ${CONFIG_DIR}/theme_definitions/*.conf))
+  for i in "${theme_definitions[@]}"
+  do
+    echo "${i}"
+  done
+}
+
+setThemeVariables() {
+  # 1. Set the current theme, using setSavedSetting
+  # 2. Use the theme's .conf file to set all the env variables
+  theme_name="${1}"
+
+  setSavedSetting "${CONFIG_DIR}"/current_theme.txt "${theme_name}"
+
+  exportVars
+
+  setTerminalTheme "${theme_name}"
+}
 
 helpStringFunction() {
-  echo "chit:"
+  echo "chit usage:"
   echo "  -h|--help:
           Show this help message"
   echo "  -i|--shell-init:
@@ -204,9 +213,7 @@ helpStringFunction() {
 
 # Handle input to this script
 case $1 in
-  -h*|--help)
-    helpStringFunction
-  ;;
+  # TODO, make this a command line pyenv init?
   -i|--shell-init)
     shellInit
   ;;
@@ -216,12 +223,16 @@ case $1 in
   -s|--set-theme)
     setThemeVariables $2
   ;;
-  -g|--get-theme-variable)
-    getThemeVariable $2
+  # TODO 'Create' command?
+  # TODO is this needed? Just debugging?
+  # -g|--get-theme-variable)
+    # getThemeVariable $2
+  # ;;
+  -h*|--help)
+    helpStringFunction
   ;;
   *)
-    echo "Option not recognized ($1);"
-    echo ""
+    # TODO could put a message here about the option not being recognized
     helpStringFunction
   ;;
 esac
