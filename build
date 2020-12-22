@@ -8,4 +8,4 @@ touch "${configFolder}"/current_theme
 
 exampleFolder="${configFolder}"/theme_definitions/examples
 mkdir -p "${exampleFolder}"
-cp theme_definitions/examples/* "${exampleFolder}"
+cp -r theme_definitions/examples/* "${exampleFolder}"
