@@ -6,6 +6,6 @@ configFolder=${HOME}/.config/chit
 mkdir -p "${configFolder}"
 touch "${configFolder}"/current_theme
 
-themeFolder="${configFolder}"/theme_definitions
+exampleFolder="${configFolder}"/theme_definitions/examples
 mkdir -p "${exampleFolder}"
-cp theme_definitions "${themeFolder}"
+cp theme_definitions/examples/* "${exampleFolder}"

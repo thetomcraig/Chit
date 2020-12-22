@@ -172,7 +172,7 @@ shellInit() {
 listThemes() {
   # List all the themes
   # Each defined in a .conf file
-  example_definitions=($(ls ${CONFIG_DIR}/theme_definitions))
+  example_definitions=($(ls ${CONFIG_DIR}/theme_definitions/examples))
   for i in "${example_definitions[@]}"
   do
     echo "${i}"
