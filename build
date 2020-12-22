@@ -9,5 +9,3 @@ touch "${configFolder}"/current_theme
 themeFolder="${configFolder}"/theme_definitions
 mkdir -p "${exampleFolder}"
 cp theme_definitions "${themeFolder}"
-
-
