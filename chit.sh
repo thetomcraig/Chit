@@ -154,7 +154,7 @@ setup() {
   local exampleFolder="${CONFIG_DIR}"/theme_definitions/examples
   mkdir -p "${exampleFolder}"
 
-  cp -r /usr/local/etc/chit/example_theme_definitions "${exampleFolder}"
+  cp -r /usr/local/etc/chit/example_theme_definitions/* "${exampleFolder}"
 }
 
 shellInit() {
