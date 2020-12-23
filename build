@@ -2,10 +2,10 @@
 
 cp chit.sh chit
 
-configFolder=${HOME}/.config/chit
-mkdir -p "${configFolder}"
-touch "${configFolder}"/current_theme
+# configFolder=${HOME}/.config/chit
+# mkdir -p "${configFolder}"
+# touch "${configFolder}"/current_theme
 
-exampleFolder="${configFolder}"/theme_definitions/examples
-mkdir -p "${exampleFolder}"
-cp -r theme_definitions/examples/* "${exampleFolder}"
+# exampleFolder="${configFolder}"/theme_definitions/examples
+# mkdir -p "${exampleFolder}"
+# cp -r theme_definitions/examples/* "${exampleFolder}"
