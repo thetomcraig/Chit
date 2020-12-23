@@ -157,7 +157,7 @@ setup() {
   # Could find that and use it here, or could try to have this step happen on insall with brew
   # The second is preferred but trickier
 
-  cp -r example_theme_definitions/* "${exampleFolder}"
+  cp -r example_theme_definitions "${exampleFolder}"
 }
 
 shellInit() {
