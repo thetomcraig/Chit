@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # Homebrew build/install steps will make and populate this folder
-CONFIG_DIR= configLocation=${HOME}/.config/chit
+CONFIG_DIR=${HOME}/.config/chit
 # Must have a line in the kitty conf file to use this one
 # TODO: Add readme step for this, and for other kitty seettings
 KITTY_THEME_CONF_PATH="${HOME}/.config/kitty/theme.conf"
@@ -146,6 +146,16 @@ exportVars() {
 #######################
 # MAIN CHIT FUNCTIONS #
 #######################
+setup() {
+  # Create the config files in ~/.config
+  mkdir -p "${CONFIG_DIR}"
+  touch "${CONFIG_DIR}}"/current_theme
+
+  local exampleFolder="${CONFIG_DIR}"/theme_definitions/examples
+  mkdir -p "${exampleFolder}"
+  cp -r theme_definitions/examples/* "${exampleFolder}"
+}
+
 shellInit() {
   # To be run on shell start (.bash_profile .zshrc etc.)
   exportVars
@@ -199,28 +209,32 @@ setThemeVariables() {
 
 helpStringFunction() {
   echo "chit usage:"
-  echo "  -h|--help:
+  echo "  h|help:
           Show this help message"
-  echo "  -i|--shell-init:
-          Function to be called on shell init (.zshrc, .bash_profile, etc.)"
-  echo "  -l|--list-themes:
+  echo "  u|setup:
+          setup the necessary files in ~/.config"
+  echo "  h|shell-init:
+          function to be called on shell init (.zshrc, .bash_profile, etc.)"
+  echo "  l|list-themes:
           List available themes"
-  echo "  -s|--set-theme:
+  echo "  s|set-theme:
           Set the current theme"
-  echo "  -g|--get-theme-variable:
+  echo "  g|get-theme-variable:
           Given a variable, return it's value in the current theme"
 }
 
 # Handle input to this script
 case $1 in
-  # TODO, make this a command line pyenv init?
-  -i|--shell-init)
+  u|setup)
+    setup
+  ;;
+  h|shell-init)
     shellInit
   ;;
-  -l|--list-themes)
+  l|list-themes)
     listThemes $2
   ;;
-  -s|--set-theme)
+  s|set-theme)
     setThemeVariables $2
   ;;
   # TODO 'Create' command?
@@ -228,7 +242,7 @@ case $1 in
   # -g|--get-theme-variable)
     # getThemeVariable $2
   # ;;
-  -h*|--help)
+  h*|help)
     helpStringFunction
   ;;
   *)
