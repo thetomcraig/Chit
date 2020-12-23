@@ -153,11 +153,8 @@ setup() {
 
   local exampleFolder="${CONFIG_DIR}"/theme_definitions/examples
   mkdir -p "${exampleFolder}"
-  # TODO: this does not work because it needs to be pointed at the cellar location of the example folder
-  # Could find that and use it here, or could try to have this step happen on insall with brew
-  # The second is preferred but trickier
 
-  cp -r example_theme_definitions "${exampleFolder}"
+  cp -r /usr/local/etc/chit/example_theme_definitions "${exampleFolder}"
 }
 
 shellInit() {
@@ -173,8 +170,6 @@ shellInit() {
       # For kitty terminal, the kitty .conf file does not reload unless you restart the application
       # To get around that, this checks if the theme file changed, and manually applies it
       if ! [ -z "${CHIT_KITTY_THEME_CONF_FILE_PATH}" ]; then
-        echo "it's not empty"
-        echo "${CHIT_KITTY_THEME_CONF_FILE_PATH}"
         if ! $(kittyThemeIsApplied "${CHIT_KITTY_THEME_CONF_FILE_PATH}"); then
           kitty @ set-colors "${CHIT_KITTY_THEME_CONF_FILE_PATH}"
         fi
