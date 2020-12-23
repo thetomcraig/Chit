@@ -1,3 +1,12 @@
 #!/usr/bin/env bash
 
 cp chit.sh chit
+
+CONFIG_DIR=${HOME}/.config/chit
+
+mkdir -p "${CONFIG_DIR}"
+touch "${CONFIG_DIR}"/current_theme
+
+exampleFolder="${CONFIG_DIR}"/theme_definitions/examples
+mkdir -p "${exampleFolder}"
+cp -r example_theme_definitions/* "${exampleFolder}"
