@@ -153,7 +153,11 @@ setup() {
 
   local exampleFolder="${CONFIG_DIR}"/theme_definitions/examples
   mkdir -p "${exampleFolder}"
-  cp -r theme_definitions/examples/* "${exampleFolder}"
+  # TODO: this does not work because it needs to be pointed at the cellar location of the example folder
+  # Could find that and use it here, or could try to have this step happen on insall with brew
+  # The second is preferred but trickier
+
+  cp -r example_theme_definitions/* "${exampleFolder}"
 }
 
 shellInit() {
@@ -213,7 +217,7 @@ helpStringFunction() {
       Show this help message"
   echo "  u|setup:
       setup the necessary files in ~/.config"
-  echo "  h|shell-init:
+  echo "  i|shell-init:
       Function to be called on shell init (.zshrc, .bash_profile, etc.)"
   echo "  l|list-themes:
       List available themes"
@@ -228,7 +232,7 @@ case $1 in
   u|setup)
     setup
   ;;
-  h|shell-init)
+  i|shell-init)
     shellInit
   ;;
   l|list-themes)
