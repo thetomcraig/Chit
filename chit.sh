@@ -149,7 +149,7 @@ exportVars() {
 setup() {
   # Create the config files in ~/.config
   mkdir -p "${CONFIG_DIR}"
-  touch "${CONFIG_DIR}}"/current_theme
+  touch "${CONFIG_DIR}"/current_theme
 
   local exampleFolder="${CONFIG_DIR}"/theme_definitions/examples
   mkdir -p "${exampleFolder}"
@@ -210,17 +210,17 @@ setThemeVariables() {
 helpStringFunction() {
   echo "chit usage:"
   echo "  h|help:
-          Show this help message"
+      Show this help message"
   echo "  u|setup:
-          setup the necessary files in ~/.config"
+      setup the necessary files in ~/.config"
   echo "  h|shell-init:
-          function to be called on shell init (.zshrc, .bash_profile, etc.)"
+      Function to be called on shell init (.zshrc, .bash_profile, etc.)"
   echo "  l|list-themes:
-          List available themes"
+      List available themes"
   echo "  s|set-theme:
-          Set the current theme"
+      Set the current theme"
   echo "  g|get-theme-variable:
-          Given a variable, return it's value in the current theme"
+      Given a variable, return it's value in the current theme"
 }
 
 # Handle input to this script
