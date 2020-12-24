@@ -1,7 +1,7 @@
 version="${1}"
 archive_name="chit.${version}.tar.gz"
 
-tar -zcvf "${archive_name}" chit.sh build iterm example_theme_definitions
+tar -zcvf "${archive_name}" chit.sh build iterm example_theme_definitions kitty_themes
 mv "${archive_name}" archive
 
 git add archive
