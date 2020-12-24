@@ -49,19 +49,19 @@ kittyThemeIsApplied() {
   # Check the colors being used in the kitty session
   # If the do not match the theme set by chit reurn false
   # Used to manually set kitty colors on shell start
-  desiredThemePath=$1
+  desired_theme_path=$1
 
-  themeColors=(
+  theme_colors=(
   background
   foreground
   color0
   # Other colors could be checked, but takes too much time
   )
 
-  for color in "${themeColors[@]}"; do
-    desiredThemeColor=$(grep -w "${color}" "${desiredThemePath}" | sed 's/ //g' | tr '[:upper:]' '[:lower:]')
-    currentThemeColor=$(kitty @ get-colors | grep -w "${color}" | sed 's/ //g'| tr '[:upper:]' '[:lower:]')
-    if [[ "${desiredThemeColor}" != "${currentThemeColor}" ]]; then
+  for color in "${theme_colors[@]}"; do
+    desired_theme_color=$(grep -w "${color}" "${desired_theme_path}" | sed 's/ //g' | tr '[:upper:]' '[:lower:]')
+    current_theme_color=$(kitty @ get-colors | grep -w "${color}" | sed 's/ //g'| tr '[:upper:]' '[:lower:]')
+    if [[ "${desired_theme_color}" != "${current_theme_color}" ]]; then
       return 1 # False
     fi
   done
@@ -112,7 +112,8 @@ setiTermTheme() {
 getThemeVariable() {
   # Given a variable, read the .conf file for the current theme
   # Return the value for the variable passed in
-  variable_desired="${1}"
+  current_theme_name="${1}"
+  variable_desired="${2}"
 
   value=""
 
@@ -134,12 +135,14 @@ getThemeVariable() {
 }
 
 exportVars() {
+  current_theme_name=${1}
+
   # Export all the CHIT_ variables, so they're in the current env
-  export CHIT_ITERM_SCHEME=$(getThemeVariable "iterm_scheme")
-  export CHIT_KITTY_THEME_CONF_FILE_PATH=$(getThemeVariable "kitty_theme_path")
-  export CHIT_VIM_COLORSCHEME=$(getThemeVariable "vim_colorscheme")
-  export CHIT_BAT_THEME=$(getThemeVariable "bat_theme")
-  export CHIT_VIM_BEFORE=$(getThemeVariable "vim_before")
+  export CHIT_ITERM_SCHEME=$(getThemeVariable "${current_theme_name}" "iterm_scheme")
+  export CHIT_KITTY_THEME_CONF_FILE_PATH=$(getThemeVariable "${current_theme_name}" "kitty_theme_path")
+  export CHIT_VIM_COLORSCHEME=$(getThemeVariable "${current_theme_name}" "vim_colorscheme")
+  export CHIT_BAT_THEME=$(getThemeVariable "${current_theme_name}" "bat_theme")
+  export CHIT_VIM_BEFORE=$(getThemeVariable "${current_theme_name}" "vim_before")
 }
 
 
@@ -150,16 +153,18 @@ setup() {
   # Create the config files in ~/.config
   mkdir -p "${CONFIG_DIR}"
   touch "${CONFIG_DIR}"/current_theme
+  echo "dark" > "${CONFIG_DIR}"/current_theme
 
-  local exampleFolder="${CONFIG_DIR}"/theme_definitions/examples
-  mkdir -p "${exampleFolder}"
+  local theme_folder="${CONFIG_DIR}"/theme_definitions
+  mkdir -p "${theme_folder}"
 
-  cp -r /usr/local/etc/chit/example_theme_definitions/* "${exampleFolder}"
+  cp -r /usr/local/etc/chit/example_theme_definitions/* "${theme_folder}"
 }
 
 shellInit() {
   # To be run on shell start (.bash_profile .zshrc etc.)
-  exportVars
+  current_theme_name=$(getSavedSetting "${CONFIG_DIR}"/current_theme)
+  exportVars "${current_theme_name}"
 
   emulator=$(getTerminalEmulator)
   case $emulator in
@@ -176,21 +181,29 @@ shellInit() {
       fi
     ;;
   esac
+
+  echo "chit has set the theme to ${current_theme_name}"
 }
 
 listThemes() {
   # List all the themes
   # Each defined in a .conf file
-  example_definitions=($(ls ${CONFIG_DIR}/theme_definitions/examples))
+
+  # If the setup process has nott run, do it now
+  if [ ! -d "${CONFIG_DIR}" ]; then
+    setup
+  fi
+
+  example_definitions=($(ls ${CONFIG_DIR}/theme_definitions/examples/*.conf))
   for i in "${example_definitions[@]}"
   do
-    echo "${i}"
+    echo $(basename "${i}" | sed "s/.conf//g")
   done
 
-  theme_definitions=($(ls ${CONFIG_DIR}/theme_definitions/*.conf))
+  theme_definitions=($(ls ${CONFIG_DIR}/theme_definitions/*.conf 2> /dev/null))
   for i in "${theme_definitions[@]}"
   do
-    echo "${i}"
+    echo $(basename "${i}" | sed "s/.conf//g")
   done
 }
 
@@ -201,7 +214,8 @@ setThemeVariables() {
 
   setSavedSetting "${CONFIG_DIR}"/current_theme "${theme_name}"
 
-  exportVars
+  current_theme_name=$(getSavedSetting "${CONFIG_DIR}"/current_theme)
+  exportVars "${current_theme_name}"
 
   setTerminalTheme "${theme_name}"
 }
