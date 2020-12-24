@@ -82,10 +82,12 @@ setTerminalTheme() {
     kitty)
       # This command sets the current TTY
       if ! [ -z "${CHIT_KITTY_THEME_CONF_FILE_PATH}" ]; then
-        kitty @ set-colors  "${CHIT_KITTY_THEME_CONF_FILE_PATH}"
+        eval kitty @ set-colors "${CHIT_KITTY_THEME_CONF_FILE_PATH}"
         # To make new windows take this effect, must restart kitty
         # Looking into hot reloading, see here https://github.com/kovidgoyal/kitty/issues/1292
-        cp "${CHIT_KITTY_THEME_CONF_FILE_PATH}" "${KITTY_THEME_CONF_PATH}"
+
+        eval cp "${CHIT_KITTY_THEME_CONF_FILE_PATH}" "${KITTY_THEME_CONF_PATH}"
+
       fi
     ;;
     iTerm2)
