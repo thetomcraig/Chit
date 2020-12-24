@@ -157,8 +157,11 @@ setup() {
 
   local theme_folder="${CONFIG_DIR}"/theme_definitions
   mkdir -p "${theme_folder}"
-
   cp -r /usr/local/etc/chit/example_theme_definitions/* "${theme_folder}"
+
+  local kitty_theme_folder="${CONFIG_DIR}"/kitty_themes
+  mkdir -p "${kitty_theme_folder}"
+  cp -r /usr/local/etc/chit/kitty_themes/* "${kitty_theme_folder}"
 }
 
 shellInit() {
@@ -193,12 +196,6 @@ listThemes() {
   if [ ! -d "${CONFIG_DIR}" ]; then
     setup
   fi
-
-  example_definitions=($(ls ${CONFIG_DIR}/theme_definitions/examples/*.conf))
-  for i in "${example_definitions[@]}"
-  do
-    echo $(basename "${i}" | sed "s/.conf//g")
-  done
 
   theme_definitions=($(ls ${CONFIG_DIR}/theme_definitions/*.conf 2> /dev/null))
   for i in "${theme_definitions[@]}"
