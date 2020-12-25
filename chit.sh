@@ -79,20 +79,12 @@ setTerminalTheme() {
 
   emulator=$(getTerminalEmulator)
   case $emulator in
-    kitty)
-      # This command sets the current TTY
-      if ! [ -z "${CHIT_KITTY_THEME_CONF_FILE_PATH}" ]; then
-        eval kitty @ set-colors "${CHIT_KITTY_THEME_CONF_FILE_PATH}"
-        # To make new windows take this effect, must restart kitty
-        # Looking into hot reloading, see here https://github.com/kovidgoyal/kitty/issues/1292
-
-        eval cp "${CHIT_KITTY_THEME_CONF_FILE_PATH}" "${KITTY_THEME_CONF_PATH}"
-
-      fi
-    ;;
     iTerm2)
       # This command sets the current TTY
       setiTermTheme "${CHIT_ITERM_SCHEME}"
+    ;;
+    kitty)
+      setKittyTheme "${CHIT_KITTY_THEME_CONF_FILE_PATH}"
     ;;
   esac
 }
@@ -111,6 +103,33 @@ setiTermTheme() {
   fi
 }
 
+setKittyTheme() {
+theme="${1}"
+
+eval kitty @ set-colors "${theme}"
+}
+
+refreshKittyTheme() {
+# For kitty, the kitty.conf file sources a file called "theme.conf"
+# This file is a copy of the corresponding kitty theme file in chit
+# This checks if the file is theme file is present, and if it has been applied
+# If not, the new theme conf file is copied to "theme.conf" to kitty to use
+# Also, the correct colors are then set for the current session
+kitty_conf=$(getThemeVariable "${1}" "kitty_theme_path")
+if ! [ -z "${kitty_conf}" ]; then
+  # The string is not empty
+  if [[ -f "${kitty_conf}" ]]; then
+    # There is a kitty theme file with this path on disk
+    if ! $(kittyThemeIsApplied "${kitty_conf}"); then
+      # Then, copy this theme file to the one sourced in kitty
+      # This means it will be set properly by kitty on next start
+      eval cp "${kitty_conf}" "${KITTY_THEME_CONF_PATH}"
+      setKittyTheme "${kitty_conf}"
+    fi
+  fi
+fi
+}
+
 getFullPathToThemeFile() {
   # Given the name of a theme, construct the string for it's full path on disk
   # Then check if a files exists at that location
@@ -127,29 +146,25 @@ getFullPathToThemeFile() {
 getThemeVariable() {
   # Given a variable, read the .conf file for the current theme
   # Return the value for the variable passed in
-  current_theme_name="${1}"
+  theme_name="${1}"
   variable_desired="${2}"
 
   value=""
 
-  current_theme_name=$(getSavedSetting "${CONFIG_DIR}"/current_theme)
-  full_path_to_theme_conf=$(getFullPathToThemeFile "${current_theme_name}")
-  if [ -z "${full_path_to_theme_conf}" ]; then
-    echo "There is no theme with the name '${theme_name}'"
-  else
-    while read line
-    do
-        if echo $line | grep -F = &>/dev/null
-        then
-            if [ "${variable_desired}" = $(echo "$line" | cut -d '=' -f 1) ]
-            then
-                value=$(echo "$line" | cut -d '=' -f 2-)
-            fi
-        fi
-    done < "${full_path_to_theme_conf}"
+  theme_name=$(getSavedSetting "${CONFIG_DIR}"/current_theme)
+  full_path_to_theme_conf=$(getFullPathToThemeFile "${theme_name}")
+  while read line
+  do
+      if echo $line | grep -F = &>/dev/null
+      then
+          if [ "${variable_desired}" = $(echo "$line" | cut -d '=' -f 1) ]
+          then
+              value=$(echo "$line" | cut -d '=' -f 2-)
+          fi
+      fi
+  done < "${full_path_to_theme_conf}"
 
-    echo "${value}"
-  fi
+  echo "${value}"
 }
 
 exportVars() {
@@ -185,33 +200,35 @@ setup() {
 
 shellInit() {
   # To be run on shell start (.bash_profile .zshrc etc.)
-  current_theme_name=$(getSavedSetting "${CONFIG_DIR}"/current_theme)
-  exportVars "${current_theme_name}"
+  # Get the name of the currently set theme from the "current_theme" file
+  # If there is not theme file with this name, throw an error
+  # Otherwise, export variable and set terminal colors accordingly
+  current_theme_name=$(getSavedSetting ${CONFIG_DIR}/current_theme)
 
-  emulator=$(getTerminalEmulator)
-  case $emulator in
-    iTerm2)
-      setiTermTheme "${CHIT_ITERM_SCHEME}"
-    ;;
-    kitty)
-      # For kitty terminal, the kitty .conf file does not reload unless you restart the application
-      # To get around that, this checks if the theme file changed, and manually applies it
-      if ! [ -z "${CHIT_KITTY_THEME_CONF_FILE_PATH}" ]; then
-        if ! $(kittyThemeIsApplied "${CHIT_KITTY_THEME_CONF_FILE_PATH}"); then
-          kitty @ set-colors "${CHIT_KITTY_THEME_CONF_FILE_PATH}"
-        fi
-      fi
-    ;;
-  esac
+  full_path_to_theme_conf=$(getFullPathToThemeFile "${current_theme_name}")
+  if [ -z "${full_path_to_theme_conf}" ]; then
+    echo "chit unable to load; there is no theme with the name '${theme_name}'"
+  else
+    exportVars "${current_theme_name}"
 
-  echo "chit has set the theme to ${current_theme_name}"
+    emulator=$(getTerminalEmulator)
+    case $emulator in
+      iTerm2)
+        setiTermTheme "${CHIT_ITERM_SCHEME}"
+      ;;
+      kitty)
+        refreshKittyTheme "${current_theme_name}"
+      ;;
+    esac
+    echo "chit theme is '${current_theme_name}'"
+  fi
 }
 
 listThemes() {
   # List all the themes
   # Each defined in a .conf file
 
-  # If the setup process has nott run, do it now
+  # If the one-time setup process has not run, do it now
   if [ ! -d "${CONFIG_DIR}" ]; then
     setup
   fi
