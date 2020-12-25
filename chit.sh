@@ -111,6 +111,19 @@ setiTermTheme() {
   fi
 }
 
+getFullPathToThemeFile() {
+  # Given the name of a theme, construct the string for it's full path on disk
+  # Then check if a files exists at that location
+  # If yes, return it, otherwise return empty string
+  theme_name="${1}"
+  full_path_string="${CONFIG_DIR}/theme_definitions/${theme_name}.conf"
+  if [[ -f "${full_path_string}" ]]; then
+    echo "${full_path_string}"
+  else
+    echo ""
+  fi
+}
+
 getThemeVariable() {
   # Given a variable, read the .conf file for the current theme
   # Return the value for the variable passed in
@@ -120,23 +133,27 @@ getThemeVariable() {
   value=""
 
   current_theme_name=$(getSavedSetting "${CONFIG_DIR}"/current_theme)
-  full_path_to_theme_conf="${CONFIG_DIR}/theme_definitions/${current_theme_name}.conf"
+  full_path_to_theme_conf=$(getFullPathToThemeFile "${current_theme_name}")
+  if [ -z "${full_path_to_theme_conf}" ]; then
+    echo "There is no theme with the name '${theme_name}'"
+  else
+    while read line
+    do
+        if echo $line | grep -F = &>/dev/null
+        then
+            if [ "${variable_desired}" = $(echo "$line" | cut -d '=' -f 1) ]
+            then
+                value=$(echo "$line" | cut -d '=' -f 2-)
+            fi
+        fi
+    done < "${full_path_to_theme_conf}"
 
-  while read line
-  do
-      if echo $line | grep -F = &>/dev/null
-      then
-          if [ "${variable_desired}" = $(echo "$line" | cut -d '=' -f 1) ]
-          then
-              value=$(echo "$line" | cut -d '=' -f 2-)
-          fi
-      fi
-  done < "${full_path_to_theme_conf}"
-
-  echo "${value}"
+    echo "${value}"
+  fi
 }
 
 exportVars() {
+  # TODO can this take in a full path?
   current_theme_name=${1}
 
   # Export all the CHIT_ variables, so they're in the current env
@@ -211,12 +228,14 @@ setThemeVariables() {
   # 2. Use the theme's .conf file to set all the env variables
   theme_name="${1}"
 
-  setSavedSetting "${CONFIG_DIR}"/current_theme "${theme_name}"
-
-  current_theme_name=$(getSavedSetting "${CONFIG_DIR}"/current_theme)
-  exportVars "${current_theme_name}"
-
-  setTerminalTheme "${theme_name}"
+  full_path_to_theme_conf=$(getFullPathToThemeFile "${theme_name}")
+  if [ -z "${full_path_to_theme_conf}" ]; then
+    echo "There is no theme with the name '${theme_name}'"
+  else
+    setSavedSetting "${CONFIG_DIR}"/current_theme "${theme_name}"
+    exportVars "${theme_name}"
+    setTerminalTheme "${theme_name}"
+  fi
 }
 
 helpStringFunction() {
