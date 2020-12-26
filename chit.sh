@@ -98,7 +98,7 @@ setTerminalTheme() {
       setiTermTheme "${CHIT_ITERM_SCHEME}"
     ;;
     kitty)
-      kitty_theme_conf_path=$(getThemeVariable ${full_path_to_theme_conf} kitty_theme_path)
+      kitty_theme_conf_path=$(getThemeVariable ${full_path_to_theme_conf} CHIT_KITTY_THEME_CONF_FILE_PATH)
       eval kitty @ set-colors "${kitty_theme_conf_path}"
     ;;
   esac
@@ -110,7 +110,7 @@ refreshKittyTheme() {
 # This checks if the theme file is present, and if it has been applied.
 # If not, the new theme conf file is copied to "theme.conf" to kitty to use at next load
 # Also, the correct colors are then set for the current session
-kitty_conf=$(getThemeVariable "${1}" "kitty_theme_path")
+kitty_conf=$(getThemeVariable "${1}" "CHIT_KITTY_THEME_CONF_FILE_PATH")
 if [ "${kitty_conf}" ]; then
   # The string is not empty
   eval ls ${kitty_conf} > /dev/null 2>&1
