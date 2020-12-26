@@ -172,13 +172,16 @@ exportVars() {
   theme_name=${1}
   full_path_to_theme_conf=$(getFullPathToThemeFile "${theme_name}")
 
-  # TODO change syntax of conf files to be caps, can make this logic simplier
-  echo "export CHIT_ITERM_SCHEME=$(getThemeVariable ${full_path_to_theme_conf} iterm_scheme)"
-  echo "export CHIT_KITTY_THEME_CONF_FILE_PATH=$(getThemeVariable ${full_path_to_theme_conf} kitty_theme_path)"
-  echo "export CHIT_VIM_COLORSCHEME=$(getThemeVariable ${full_path_to_theme_conf} vim_colorscheme)"
-  echo "export CHIT_VIM_BEFORE=$(getThemeVariable ${full_path_to_theme_conf} vim_before)"
-  echo "export CHIT_BAT_THEME=$(getThemeVariable ${full_path_to_theme_conf} bat_theme)"
-  echo "export BAT_THEME=$(getThemeVariable ${full_path_to_theme_conf} bat_theme)"
+  chit_vars=(
+    'CHIT_ITERM_SCHEME'
+    'CHIT_KITTY_THEME_CONF_FILE_PATH'
+    'CHIT_VIM_COLORSCHEME'
+    'CHIT_VIM_BEFORE'
+    'BAT_THEME'
+  )
+  for i in "${chit_vars[@]}"; do
+    echo "export ${i}=$(getThemeVariable ${full_path_to_theme_conf} ${i})"
+  done
 }
 
 
@@ -291,6 +294,13 @@ case $1 in
   ;;
   s|set-theme)
     setThemeVariables $2
+  ;;
+  c|get-current-theme)
+    getSavedSetting ${CONFIG_DIR}/current_theme
+  ;;
+  g|get-theme-variable)
+    full_path_to_theme_conf=$(getFullPathToThemeFile "${2}")
+    getThemeVariable $full_path_to_theme_conf $3
   ;;
   h*|help)
     helpStringFunction
