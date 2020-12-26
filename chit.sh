@@ -190,6 +190,7 @@ setup() {
   # Copy example theme files to this directory
   mkdir -p "${CONFIG_DIR}"
   touch "${CONFIG_DIR}"/current_theme
+  echo "dark" > "${CONFIG_DIR}"/current_theme
 
   local theme_folder="${CONFIG_DIR}"/theme_definitions
   mkdir -p "${theme_folder}"
@@ -270,13 +271,17 @@ helpStringFunction() {
   echo "  h|help:
       Show this help message"
   echo "  u|setup:
-      setup the necessary files in ~/.config"
+      Setup the necessary files in ~/.config"
   echo "  i|shell-init:
       Function to be called on shell init (.zshrc, .bash_profile, etc.)"
   echo "  l|list-themes:
       List available themes"
-  echo "  s|set-theme:
-      Set the current theme"
+  echo "  s|set-theme theme_name:
+      Set the current theme to theme_name"
+  echo "  c|get-current-theme:
+      Show the name of the current theme"
+  echo "  g|get-theme-variable theme_name variable_name:
+      Get the value for variable_name in theme named theme_name"
   echo "  g|get-theme-variable:
       Given a variable, return it's value in the current theme"
 }
@@ -290,7 +295,7 @@ case $1 in
     shellInit
   ;;
   l|list-themes)
-    listThemes $2
+    listThemes
   ;;
   s|set-theme)
     setThemeVariables $2
