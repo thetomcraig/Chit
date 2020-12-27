@@ -10,9 +10,11 @@
 <p align="center">
   <a href="#introduction">Introduction</a> •
   <a href="#how-to-use">How To Use</a> •
-  <a href="#how-it-works">How it Works</a> •
+  <a href="#how-it-works">How it Works</a><br>
   <a href="#installation">Installation</a> •
-  <a href="#adding-themes">Adding Themes</a>
+  <a href="#adding-themes">Adding Themes</a> •
+  <a href="#credits-and-license">Credits and License
+</a>
 </p>
 
 ### Introduction
@@ -93,3 +95,25 @@ To integrate with Vim, install the [vim-chit](https://github.com/thetomcraig/vim
 This will allow `bat` to always use the correct `chit` theme, without needing to reset the environment variables.
 
 ### Adding Themes
+TODO
+
+### Credits and License
+#### Icons
+<div>Icons made by <a href="https://www.flaticon.com/authors/smashicons" title="Smashicons">Smashicons</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a></div>
+
+#### Color Themes  and Schemes
+Names and files for color the example "schemes" and "themes" included and shown are not authored by me.  They are originally taken from the following sources:
+
+- "ayu"
+  - [iTerm Scheme](https://github.com/hwyncho/ayu-iTerm)
+  - [Vim Colorscheme](https://github.com/ayu-theme/ayu-vim)
+  - [Kitty Theme Plugin](https://github.com/dexpota/kitty-themes#ayu)
+- "nord"
+  - [iTerm Scheme](https://github.com/arcticicestudio/nord-iterm2)
+  - [Vim Colorscheme](https://github.com/arcticicestudio/nord-vim)
+  - [Kitty Theme Plugin](https://github.com/connorholyday/nord-kitty)
+- "solarized"
+  - TODO
+ 
+#### License
+[MIT](https://opensource.org/licenses/MIT)
