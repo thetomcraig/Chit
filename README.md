@@ -1,6 +1,6 @@
 <p align="center">
   <img src="img/chit-icon.png" alt="chit title"><br>
-  Chit: For changing themes.
+  <b>chit</b>: For <b>ch</b>anging <b>t</b>hemes.
 </p>
 
 <p align="center">
