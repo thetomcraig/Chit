@@ -74,16 +74,14 @@ kittyThemeIsApplied() {
 
 
 setiTermTheme() {
-  scheme=$1
-
+  scheme=$(getThemeVariable "${1}" "CHIT_ITERM_SCHEME")
   if [ -n "$TMUX" ]; then
     # If inside tmux, need to use the applescript to
     # Set all the colors
     osascript ${CONFIG_DIR}/iterm/change_iterm_session.scpt "${scheme}" &> /dev/null
   else
     # Otherwise, we can use the iTerm escape sequence
-      # TODO this check doesnt work... weird
-    echo -e "\033]1337;SetColors=preset=${scheme}\a"
+    eval echo -e "\033]1337;SetColors=preset=${scheme}\a"
   fi
 }
 
@@ -95,7 +93,7 @@ setTerminalTheme() {
   case $emulator in
     iTerm2)
       # This command sets the current TTY
-      setiTermTheme "${CHIT_ITERM_SCHEME}"
+      setiTermTheme "${full_path_to_theme_conf}"
     ;;
     kitty)
       kitty_theme_conf_path=$(getThemeVariable ${full_path_to_theme_conf} CHIT_KITTY_THEME_CONF_FILE_PATH)
@@ -169,14 +167,15 @@ getThemeVariable() {
 }
 
 exportVars() {
-  theme_name=${1}
-  full_path_to_theme_conf=$(getFullPathToThemeFile "${theme_name}")
+  full_path_to_theme_conf=${1}
 
   chit_vars=(
-    'CHIT_ITERM_SCHEME'
-    'CHIT_KITTY_THEME_CONF_FILE_PATH'
-    'CHIT_VIM_COLORSCHEME'
-    'CHIT_VIM_BEFORE'
+    # 'CHIT_ITERM_SCHEME'
+    # 'CHIT_KITTY_THEME_CONF_FILE_PATH'
+    # Debugging, shuold these just not be exported?
+    # Vim plugin reads from the file on disk anyway
+    # 'CHIT_VIM_COLORSCHEME'
+    # 'CHIT_VIM_BEFORE'
     'BAT_THEME'
   )
   for i in "${chit_vars[@]}"; do
@@ -217,12 +216,12 @@ shellInit() {
     exit 1
   else
     # export all of the env vars used by chit
-    exportVars "${current_theme_name}"
+    exportVars "${full_path_to_theme_conf}"
     # do any terminal-emulator-specific initialization tasks
     emulator=$(getTerminalEmulator)
     case $emulator in
       iTerm2)
-        setiTermTheme "${CHIT_ITERM_SCHEME}"
+        setiTermTheme "${full_path_to_theme_conf}"
       ;;
       kitty)
         refreshKittyTheme "${full_path_to_theme_conf}"
@@ -262,6 +261,8 @@ setThemeVariables() {
   else
     setSavedSetting "${CONFIG_DIR}"/current_theme "${theme_name}"
     setTerminalTheme "${full_path_to_theme_conf}"
+    # echo "$(exportVars ${full_path_to_theme_conf})"
+    eval "$(chit shell-init)"
     echo "Theme set to: ${theme_name}"
   fi
 }
@@ -275,15 +276,14 @@ helpStringFunction() {
   echo "  i|shell-init:
       Function to be called on shell init (.zshrc, .bash_profile, etc.)"
   echo "  l|list-themes:
-      List available themes"
+      List available themes."
   echo "  s|set-theme theme_name:
-      Set the current theme to theme_name"
+      Set the current theme to theme_name."
   echo "  c|get-current-theme:
-      Show the name of the current theme"
-  echo "  g|get-theme-variable theme_name variable_name:
-      Get the value for variable_name in theme named theme_name"
-  echo "  g|get-theme-variable:
-      Given a variable, return it's value in the current theme"
+      Show the name of the current theme."
+  echo "  v|get-theme-variable variable_name [theme_name]:
+      Show value of variable_name in theme_name.
+      If theme_name not supplied, use the current theme."
 }
 
 # Handle input to this script
@@ -304,8 +304,12 @@ case $1 in
     getSavedSetting ${CONFIG_DIR}/current_theme
   ;;
   g|get-theme-variable)
-    full_path_to_theme_conf=$(getFullPathToThemeFile "${2}")
-    getThemeVariable $full_path_to_theme_conf $3
+    theme=$(getSavedSetting ${CONFIG_DIR}/current_theme)
+    if [ $# -eq 3 ]; then
+      theme="${3}"
+    fi
+    full_path_to_theme_conf=$(getFullPathToThemeFile "${theme}")
+    getThemeVariable $full_path_to_theme_conf $2
   ;;
   h*|help)
     helpStringFunction
