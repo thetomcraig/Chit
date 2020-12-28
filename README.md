@@ -60,6 +60,8 @@ The following variables are supported:
   - For Vim colorschemes, any command to execute before the scheme is applied.  This is handy for schemes with variants, like [ayu](https://github.com/ayu-theme/ayu-vim#installation).
 - `BAT_THEME`
   - Name of the theme for [bat](https://github.com/sharkdp/bat) to use.  If using this option, also make sure to set up [bat integration](#bat).
+- `TMUX_TPM_COMMANDS`
+  - Lines that load [TPM](https://github.com/tmux-plugins/tpm) plugins for the theme.  For example, the nord theme has it's own [TPM plugin](https://github.com/arcticicestudio/nord-tmux).
 
 ### Installation
 Installation and setup is a three step process:
@@ -85,14 +87,37 @@ This will setup everything you need in the config directory, `~/.config/chit`.  
 
 ### Integrations
 
+#### Kitty
+To integrate with kitty, these lines need to be in your `~/.config/kitty/kitty.conf` file:
+```
+include ./theme.conf
+allow_remote_control yes
+listen_on unix:/tmp/mykitty
+```
+
 #### Vim
 To integrate with Vim, install the [vim-chit](https://github.com/thetomcraig/vim-chit) Vim plugin.
 
 #### Bat
-- To integrate with `bat`, you need to alias the `bat` command to use the `chit` theme:
-  - For Zsh:
-    - ```alias bat="bat --theme \`chit get-theme-variable BAT_THEME\`"```
+To integrate with `bat`, you need to alias the `bat` command to use the `chit` theme:
+- For Zsh:
+  - ```alias bat="bat --theme \`chit get-theme-variable BAT_THEME\`"```
 This will allow `bat` to always use the correct `chit` theme, without needing to reset the environment variables.
+
+#### Tmux
+`chit` can integrate with tmux by setting the `TMUX_TPM_COMMANDS` in a theme .conf file.  
+The value of this variable should be lines that load plugins via [TPM](https://github.com/tmux-plugins/tpm).  
+You can see an example in the [ayu_dark](example_theme_definitions/ayu_dark.conf) theme file.  
+Multiple lines for TPM are separated with semicolon (`;`).  
+You must also add this line to your `.tmux.conf` file:  
+```
+source-file ~/.config/chit/tmux_theme.conf
+```
+
+__NOTE:__ You will need to reload your tmux .conf file after calling `chit s`, with the line:
+```
+tmux source-file ~/.tmux.conf
+```
 
 ### Adding Themes
 TODO
