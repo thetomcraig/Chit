@@ -31,9 +31,7 @@ setSavedSetting() {
   setting_file_name="${1}"
   setting_value="${2}"
 
-  setting_file="${setting_file_name}"
-
-  echo "${setting_value}" > "${setting_file}"
+  echo "${setting_value}" > "${setting_file_name}"
 }
 
 
@@ -189,7 +187,7 @@ setup() {
   # Copy example theme files to this directory
   mkdir -p "${CONFIG_DIR}"
   touch "${CONFIG_DIR}"/current_theme
-  echo "dark" > "${CONFIG_DIR}"/current_theme
+  setSavedSetting "${CONFIG_DIR}"/current_theme "dark"
 
   local theme_folder="${CONFIG_DIR}"/theme_definitions
   mkdir -p "${theme_folder}"
@@ -198,6 +196,9 @@ setup() {
   local kitty_theme_folder="${CONFIG_DIR}"/kitty_themes
   mkdir -p "${kitty_theme_folder}"
   cp -r /usr/local/etc/chit/kitty_themes/* "${kitty_theme_folder}"
+
+  touch ${CONFIG_DIR}/tmux_theme.conf
+  setSavedSetting "${CONFIG_DIR}"/tmux_theme.conf ""
 }
 
 shellInit() {
@@ -263,6 +264,16 @@ setThemeVariables() {
     setTerminalTheme "${full_path_to_theme_conf}"
     # echo "$(exportVars ${full_path_to_theme_conf})"
     eval "$(chit shell-init)"
+
+    IFS_ORG=IFS
+    IFS=';' read -r -a tmux_lines <<< "$(getThemeVariable ${full_path_to_theme_conf} TMUX_TPM_COMMANDS)"
+    rm "${CONFIG_DIR}/tmux_theme.conf"
+    touch "${CONFIG_DIR}/tmux_theme.conf"
+    for line in "${tmux_lines[@]}"; do
+      echo "${line}" >> "${CONFIG_DIR}/tmux_theme.conf"
+    done
+    IFS=IFS_ORG
+
     echo "Theme set to: ${theme_name}"
   fi
 }
@@ -310,6 +321,9 @@ case $1 in
     fi
     full_path_to_theme_conf=$(getFullPathToThemeFile "${theme}")
     getThemeVariable $full_path_to_theme_conf $2
+  ;;
+  r|reload)
+    echo "TODO"
   ;;
   h*|help)
     helpStringFunction
