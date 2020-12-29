@@ -91,18 +91,15 @@ setTerminalTheme() {
   emulator=$(getTerminalEmulator)
   case $emulator in
     iTerm2)
-      # This command sets the current TTY
       setiTermTheme "${full_path_to_theme_conf}"
     ;;
     kitty)
-      # kitty_theme_conf_path=$(getThemeVariable ${full_path_to_theme_conf} CHIT_KITTY_THEME_CONF_FILE_PATH)
-      # eval kitty @ set-colors "${kitty_theme_conf_path}"
-      refreshKittyTheme "${1}"
+      setKittyTheme "${full_path_to_theme_conf}"
     ;;
   esac
 }
 
-refreshKittyTheme() {
+setKittyTheme() {
 # For kitty, the kitty.conf file sources a file called "theme.conf"
 # This checks if the theme file is present, and if it has been applied.
 # If not, the new theme conf file is copied to "theme.conf" to kitty to use at next load
@@ -126,18 +123,18 @@ if [ "${kitty_conf}" ]; then
 fi
 }
 
-getFullPathToThemeFile() {
+exitIfFileDoesNotExist() {
   # Given the name of a theme, construct the string for it's full path on disk
-  # Then check if a files exists at that location
-  # If yes, return it, otherwise throw an errror and exit
-  theme_name="${1}"
-  full_path_string="${CONFIG_DIR}/theme_definitions/${theme_name}.conf"
-  if [[ -f "${full_path_string}" ]]; then
-    echo "${full_path_string}"
-  else
+  # If no file exists at that location, throw an error and exit
+  full_path_string="${CONFIG_DIR}/theme_definitions/${1}.conf"
+  if ! [[ -f "${full_path_string}" ]]; then
     >&2 echo "There is no chit theme with the name: ${theme_name}"
-    echo ""
+    exit 1
   fi
+}
+
+getFullPathToThemeFile() {
+  echo "${CONFIG_DIR}/theme_definitions/${1}.conf"
 }
 
 getThemeVariable() {
@@ -163,13 +160,9 @@ getThemeVariable() {
 }
 
 exportEnvVars() {
-  # Get the name of the currently set theme from the "current_theme" file
-  current_theme_name=$(getSavedSetting ${CONFIG_DIR}/current_theme)
-  # This will throw an error and exit if there is no theme file
-  full_path_to_theme_conf=$(getFullPathToThemeFile "${current_theme_name}")
-  if [[ "${full_path_to_theme_conf}" == "" ]]; then
-    exit 1
-  fi
+  theme_name=$(getSavedSetting ${CONFIG_DIR}/current_theme)
+  exitIfFileDoesNotExist "${theme_name}"
+  full_path_to_theme_conf=$(getFullPathToThemeFile "${theme_name}")
   # Loop through the lines in the theme file.
   # For each, echo:
   #   export line
@@ -201,18 +194,11 @@ setup() {
 shellInit() {
   # To be run on shell start (.bash_profile .zshrc etc.)
   # With the line: eval "$(chit shell-init)"
-  #
+  theme_name=$(getSavedSetting ${CONFIG_DIR}/current_theme)
+  exitIfFileDoesNotExist "${theme_name}"
+  full_path_to_theme_conf=$(getFullPathToThemeFile "${theme_name}")
   exportEnvVars
-  # do any terminal-emulator-specific initialization tasks
-  emulator=$(getTerminalEmulator)
-  case $emulator in
-    iTerm2)
-      setiTermTheme "${full_path_to_theme_conf}"
-    ;;
-    kitty)
-      refreshKittyTheme "${full_path_to_theme_conf}"
-    ;;
-  esac
+  setTerminalTheme "${full_path_to_theme_conf}"
 }
 
 listThemes() {
@@ -248,17 +234,12 @@ writeTmuxLinesToFile() {
 setTheme() {
   theme_name="${1}"
 
-  # This will throw an error and exit if there is no theme file
+  exitIfFileDoesNotExist "${theme_name}"
   full_path_to_theme_conf=$(getFullPathToThemeFile "${theme_name}")
-  if [[ "${full_path_to_theme_conf}" == "" ]]; then
-    exit 1
-  fi
-  setSavedSetting "${CONFIG_DIR}"/current_theme "${theme_name}"
-  setTerminalTheme "${full_path_to_theme_conf}"
-  writeTmuxLinesToFile "${full_path_to_theme_conf}"
   # Not calling exportEnvVars here, because it would not affect the parent shell process
-  # Instead, must rely on user to refresh their session or call:
-  #  eval "$(chit export-env-vars)"
+  setTerminalTheme "${full_path_to_theme_conf}"
+  setSavedSetting "${CONFIG_DIR}"/current_theme "${theme_name}"
+  writeTmuxLinesToFile "${full_path_to_theme_conf}"
   echo "Theme set to: ${theme_name}"
 }
 
