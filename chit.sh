@@ -2,6 +2,7 @@
 
 # Homebrew build/install steps will make and populate this folder
 CONFIG_DIR=${HOME}/.config/chit
+TPM_LINES_PATH="${CONFIG_DIR}/tmux_lines.conf"
 
 # This is the file kitty will source to apply colors
 # Chit will cp other files to this path when changing themes
@@ -84,7 +85,7 @@ setiTermTheme() {
 }
 
 setTerminalTheme() {
-  # Set the colors of the current TTY and Terminal Emulator
+  # Set the colors of the current Terminal Emulator
   full_path_to_theme_conf="${1}"
 
   emulator=$(getTerminalEmulator)
@@ -94,15 +95,15 @@ setTerminalTheme() {
       setiTermTheme "${full_path_to_theme_conf}"
     ;;
     kitty)
-      kitty_theme_conf_path=$(getThemeVariable ${full_path_to_theme_conf} CHIT_KITTY_THEME_CONF_FILE_PATH)
-      eval kitty @ set-colors "${kitty_theme_conf_path}"
+      # kitty_theme_conf_path=$(getThemeVariable ${full_path_to_theme_conf} CHIT_KITTY_THEME_CONF_FILE_PATH)
+      # eval kitty @ set-colors "${kitty_theme_conf_path}"
+      refreshKittyTheme "${1}"
     ;;
   esac
 }
 
 refreshKittyTheme() {
 # For kitty, the kitty.conf file sources a file called "theme.conf"
-# This file is a copy of the corresponding kitty theme file in chit
 # This checks if the theme file is present, and if it has been applied.
 # If not, the new theme conf file is copied to "theme.conf" to kitty to use at next load
 # Also, the correct colors are then set for the current session
@@ -125,19 +126,16 @@ if [ "${kitty_conf}" ]; then
 fi
 }
 
-
-##################
-# CHIT FUNCTIONS #
-##################
 getFullPathToThemeFile() {
   # Given the name of a theme, construct the string for it's full path on disk
   # Then check if a files exists at that location
-  # If yes, return it, otherwise return empty string
+  # If yes, return it, otherwise throw an errror and exit
   theme_name="${1}"
   full_path_string="${CONFIG_DIR}/theme_definitions/${theme_name}.conf"
   if [[ -f "${full_path_string}" ]]; then
     echo "${full_path_string}"
   else
+    >&2 echo "There is no chit theme with the name: ${theme_name}"
     echo ""
   fi
 }
@@ -164,26 +162,25 @@ getThemeVariable() {
   echo "${value}"
 }
 
-exportVars() {
-  full_path_to_theme_conf=${1}
-
-  chit_vars=(
-    # 'CHIT_ITERM_SCHEME'
-    # 'CHIT_KITTY_THEME_CONF_FILE_PATH'
-    # Debugging, shuold these just not be exported?
-    # Vim plugin reads from the file on disk anyway
-    # 'CHIT_VIM_COLORSCHEME'
-    # 'CHIT_VIM_BEFORE'
-    'BAT_THEME'
-  )
-  for i in "${chit_vars[@]}"; do
-    echo "export ${i}=$(getThemeVariable ${full_path_to_theme_conf} ${i})"
-  done
+exportEnvVars() {
+  # Get the name of the currently set theme from the "current_theme" file
+  current_theme_name=$(getSavedSetting ${CONFIG_DIR}/current_theme)
+  # This will throw an error and exit if there is no theme file
+  full_path_to_theme_conf=$(getFullPathToThemeFile "${current_theme_name}")
+  if [[ "${full_path_to_theme_conf}" == "" ]]; then
+    exit 1
+  fi
+  # Loop through the lines in the theme file.
+  # For each, echo:
+  #   export line
+  # When this function is eval-ed it sets all the variables as environment variables
+  while read i; do
+    echo export "${i}"
+  done < ${full_path_to_theme_conf}
 }
 
-
 setup() {
-  # Create the config files in ~/.config
+  # Create the config files in ~/.config/chit
   # Copy example theme files to this directory
   mkdir -p "${CONFIG_DIR}"
   touch "${CONFIG_DIR}"/current_theme
@@ -205,30 +202,17 @@ shellInit() {
   # To be run on shell start (.bash_profile .zshrc etc.)
   # With the line: eval "$(chit shell-init)"
   #
-  # Get the name of the currently set theme from the "current_theme" file
-  # If there is not theme file with this name, throw an error
-  # Otherwise, export variables and set terminal colors accordingly
-  current_theme_name=$(getSavedSetting ${CONFIG_DIR}/current_theme)
-
-  full_path_to_theme_conf=$(getFullPathToThemeFile "${current_theme_name}")
-  if [ -z "${full_path_to_theme_conf}" ]; then
-    # Echo-ing and echo, because this whole function is being eval-ed
-    echo "echo chit unable to load! There is no theme with the name: ${current_theme_name}"
-    exit 1
-  else
-    # export all of the env vars used by chit
-    exportVars "${full_path_to_theme_conf}"
-    # do any terminal-emulator-specific initialization tasks
-    emulator=$(getTerminalEmulator)
-    case $emulator in
-      iTerm2)
-        setiTermTheme "${full_path_to_theme_conf}"
-      ;;
-      kitty)
-        refreshKittyTheme "${full_path_to_theme_conf}"
-      ;;
-    esac
-  fi
+  exportEnvVars
+  # do any terminal-emulator-specific initialization tasks
+  emulator=$(getTerminalEmulator)
+  case $emulator in
+    iTerm2)
+      setiTermTheme "${full_path_to_theme_conf}"
+    ;;
+    kitty)
+      refreshKittyTheme "${full_path_to_theme_conf}"
+    ;;
+  esac
 }
 
 listThemes() {
@@ -248,34 +232,34 @@ listThemes() {
   done
 }
 
-setThemeVariables() {
-  # 1. Set the current theme, using setSavedSetting
-  # 2. Use the theme's .conf file to set the theme of the current session
+writeTmuxLinesToFile() {
+  IFS_ORG=IFS
+  IFS=';' read -r -a tmux_lines <<< "$(getThemeVariable ${1} CHIT_TPM_COMMANDS)"
+  if [[ -f "${TPM_LINES_PATH}" ]]; then
+    rm "${TPM_LINES_PATH}"
+  fi
+  touch "${TPM_LINES_PATH}"
+  for line in "${tmux_lines[@]}"; do
+    echo "${line}" >> "${TPM_LINES_PATH}"
+  done
+  IFS=IFS_ORG
+}
+
+setTheme() {
   theme_name="${1}"
 
+  # This will throw an error and exit if there is no theme file
   full_path_to_theme_conf=$(getFullPathToThemeFile "${theme_name}")
-  # TODO: this is a copy-pasted block, can simplify?
-  if [ -z "${full_path_to_theme_conf}" ]; then
-    # Echo-ing and echo, because this whole function is being eval-ed
-    echo "There is no theme with the name: ${theme_name}"
+  if [[ "${full_path_to_theme_conf}" == "" ]]; then
     exit 1
-  else
-    setSavedSetting "${CONFIG_DIR}"/current_theme "${theme_name}"
-    setTerminalTheme "${full_path_to_theme_conf}"
-    # echo "$(exportVars ${full_path_to_theme_conf})"
-    eval "$(chit shell-init)"
-
-    IFS_ORG=IFS
-    IFS=';' read -r -a tmux_lines <<< "$(getThemeVariable ${full_path_to_theme_conf} TMUX_TPM_COMMANDS)"
-    rm "${CONFIG_DIR}/tmux_theme.conf"
-    touch "${CONFIG_DIR}/tmux_theme.conf"
-    for line in "${tmux_lines[@]}"; do
-      echo "${line}" >> "${CONFIG_DIR}/tmux_theme.conf"
-    done
-    IFS=IFS_ORG
-
-    echo "Theme set to: ${theme_name}"
   fi
+  setSavedSetting "${CONFIG_DIR}"/current_theme "${theme_name}"
+  setTerminalTheme "${full_path_to_theme_conf}"
+  writeTmuxLinesToFile "${full_path_to_theme_conf}"
+  # Not calling exportEnvVars here, because it would not affect the parent shell process
+  # Instead, must rely on user to refresh their session or call:
+  #  eval "$(chit export-env-vars)"
+  echo "Theme set to: ${theme_name}"
 }
 
 helpStringFunction() {
@@ -286,13 +270,16 @@ helpStringFunction() {
       Setup the necessary files in ~/.config"
   echo "  i|shell-init:
       Function to be called on shell init (.zshrc, .bash_profile, etc.)"
+  echo "  e|export-env-vars:
+      Export variables set by the current theme.
+      To be called with an 'eval' command."
   echo "  l|list-themes:
       List available themes."
   echo "  s|set-theme theme_name:
       Set the current theme to theme_name."
   echo "  c|get-current-theme:
       Show the name of the current theme."
-  echo "  v|get-theme-variable variable_name [theme_name]:
+  echo "  g|get-theme-variable variable_name [theme_name]:
       Show value of variable_name in theme_name.
       If theme_name not supplied, use the current theme."
 }
@@ -305,11 +292,14 @@ case $1 in
   i|shell-init)
     shellInit
   ;;
+  e|export-env-vars)
+    exportEnvVars
+  ;;
   l|list-themes)
     listThemes
   ;;
   s|set-theme)
-    setThemeVariables $2
+    setTheme $2
   ;;
   c|get-current-theme)
     getSavedSetting ${CONFIG_DIR}/current_theme
@@ -321,9 +311,6 @@ case $1 in
     fi
     full_path_to_theme_conf=$(getFullPathToThemeFile "${theme}")
     getThemeVariable $full_path_to_theme_conf $2
-  ;;
-  r|reload)
-    echo "TODO"
   ;;
   h*|help)
     helpStringFunction
