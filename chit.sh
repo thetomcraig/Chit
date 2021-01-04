@@ -2,7 +2,7 @@
 
 # Homebrew build/install steps will make and populate this folder
 CONFIG_DIR=${HOME}/.config/chit
-TPM_LINES_PATH="${CONFIG_DIR}/tmux_lines.conf"
+TMUX_LINES_PATH="${CONFIG_DIR}/tmux_lines.conf"
 
 # This is the file kitty will source to apply colors
 # Chit will cp other files to this path when changing themes
@@ -221,12 +221,16 @@ listThemes() {
 writeTmuxLinesToFile() {
   IFS_ORG=IFS
   IFS=';' read -r -a tmux_lines <<< "$(getThemeVariable ${1} CHIT_TPM_COMMANDS)"
-  if [[ -f "${TPM_LINES_PATH}" ]]; then
-    rm "${TPM_LINES_PATH}"
+  if [[ -f "${TMUX_LINES_PATH}" ]]; then
+    rm "${TMUX_LINES_PATH}"
   fi
-  touch "${TPM_LINES_PATH}"
+  touch "${TMUX_LINES_PATH}"
   for line in "${tmux_lines[@]}"; do
-    echo "${line}" >> "${TPM_LINES_PATH}"
+    # To keep the syntax of the conf file reasonable,
+    # single quotes should be around this line
+    # So remove them
+    # TODO: should probably replace this with something like TOML for conf files
+    echo "${line:1:-1}" >> "${TMUX_LINES_PATH}"
   done
   IFS=IFS_ORG
 }
