@@ -220,7 +220,7 @@ listThemes() {
 
 writeTmuxLinesToFile() {
   IFS_ORG=IFS
-  IFS=';' read -r -a tmux_lines <<< "$(getThemeVariable ${1} CHIT_TPM_COMMANDS)"
+  IFS=';' read -r -a tmux_lines <<< "$(getThemeVariable ${1} CHIT_TMUX_LINES)"
   if [[ -f "${TMUX_LINES_PATH}" ]]; then
     rm "${TMUX_LINES_PATH}"
   fi
