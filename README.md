@@ -72,10 +72,21 @@ Installation and setup is a three step process:
 > brew install thetomcraig/tap/chit
 ```
 
-2. Add the initialization line to your shell:
- 
-- For Zsh:
-  - `eval "$(chit shell-init)"`
+2. Add the initialization line to your shell's .rc or .profile file:
+
+```bash
+eval "$(chit shell-init)"
+cs() {
+  chit set-theme "${1}"
+  # Reload bash environment variables
+  eval "$(chit export-env-vars)"
+  if [ -n "$TMUX" ]; then
+    # Reload tmux environment variables
+    tmux source-file ~/.tmux.conf
+  fi
+}
+
+```
 
 3. Setup `chit`:
  
