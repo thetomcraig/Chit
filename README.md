@@ -127,7 +127,7 @@ TODO
 <div>Icons made by <a href="https://www.flaticon.com/authors/smashicons" title="Smashicons">Smashicons</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a></div>
 
 #### Color Themes  and Schemes
-Names and files for color the example "schemes" and "themes" included and shown are not authored by me.  They are originally taken from the following sources:
+The example "schemes" and "themes" included are not authored by me.  They are originally taken from the following sources:
 
 - "ayu"
   - [iTerm Scheme](https://github.com/hwyncho/ayu-iTerm)
