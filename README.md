@@ -51,7 +51,7 @@ The theme .conf files define variables with a `key=value` syntax.  The lines can
 The following variables are supported:  
 
 - `CHIT_ITERM_SCHEME`
- - If using the iTerm program, name of the iTerm scheme to use.  See [here](https://github.com/mbadolato/iTerm2-Color-Schemes) for a good list.
+ - If using the iTerm program, name of the iTerm scheme to use.  See [here](https://github.com/mbadolato/iTerm2-Color-Schemes) for a good list.  You must install a sccheme to use it with chit.
 - `CHIT_KITTY_THEME_CONF_FILE_PATH`
  - If using the [kitty](https://github.com/kovidgoyal/kitty) program, path of the color .conf file to use.  See [here](https://sw.kovidgoyal.net/kitty/conf.html#color-scheme) for more information.
 - `CHIT_VIM_COLORSCHEME`
@@ -86,6 +86,9 @@ Installation and setup is a three step process:
 This will setup everything you need in the config directory, `~/.config/chit`.  Including the [example themes](example_theme_definitions).
 
 ### Integrations
+
+#### iTerm
+Integratiion with iTerm works by specifying the name of an iTerm scheme in the chit theme file.
 
 #### Kitty
 To integrate with kitty, these lines need to be in your `~/.config/kitty/kitty.conf` file:
