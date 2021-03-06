@@ -44,7 +44,7 @@ View the current theme
 ```
 
 ### How it Works
-`chit` manages a collection _themes_.  Each theme is defined in a .conf file, stored in `~/.config/chit/theme_definitions`.  On first invocation, `chit` copies some [example themes](example_theme_definitions) to this directory.
+`chit` manages a collection of _themes_.  Each theme is defined in a .conf file, stored in `~/.config/chit/theme_definitions`.  On first invocation, `chit` copies some [example themes](example_theme_definitions) to this directory.
 
 #### Theme File Format
 The theme .conf files define variables with a `key=value` syntax.  The lines can be in any order.  
