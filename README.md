@@ -61,7 +61,7 @@ The following variables are supported:
 - `CHIT_TPM_COMMANDS`
   - Lines that load [TPM](https://github.com/tmux-plugins/tpm) plugins for the theme.  For example, the nord theme has it's own [TPM plugin](https://github.com/arcticicestudio/nord-tmux).
 - `BAT_THEME`
-  - Name of the theme for [bat](https://github.com/sharkdp/bat) to use.  If using this option, also make sure to set up [bat integration](#bat).
+  - Name of the theme for [bat](https://github.com/sharkdp/bat) to use.
 
 ### Installation
 Installation and setup is a three step process:
