@@ -72,15 +72,26 @@ kittyThemeIsApplied() {
 }
 
 
-setiTermTheme() {
+getiTermEscapeSequence() {
+  # iTerm lets you dynamically change the sessions color preset,
+  # by echoing an escape sequence
+  # Construct the line that needs to run to do that, then echo it
+  # This allow us to pass the line around and execute it where necessary
   scheme=$(getThemeVariable "${1}" "CHIT_ITERM_SCHEME")
+  echo "echo -e \"\\033]1337;SetColors=preset=${scheme}\\a\""
+}
+
+setiTermTheme() {
+  full_path_to_theme_conf=${1}
+
+  scheme=$(getThemeVariable "${full_path_to_theme_conf}" "CHIT_ITERM_SCHEME")
   if [ -n "$TMUX" ]; then
     # If inside tmux, need to use the applescript to
     # Set all the colors
     osascript ${CONFIG_DIR}/iterm/change_iterm_session.scpt "${scheme}" &> /dev/null
   else
     # Otherwise, we can use the iTerm escape sequence
-    eval echo -e "\033]1337;SetColors=preset=${scheme}\a"
+    eval `getiTermEscapeSequence "${full_path_to_theme_conf}"`
   fi
 }
 
@@ -195,11 +206,16 @@ shellInit() {
   # To be run on shell start (.bash_profile .zshrc etc.)
   # With the line: eval "$(chit shell-init)"
   theme_name=$(getSavedSetting ${CONFIG_DIR}/current_theme)
+
   exitIfFileDoesNotExist "${theme_name}"
+
   full_path_to_theme_conf=$(getFullPathToThemeFile "${theme_name}")
+
   exportEnvVars
-  setTerminalTheme "${full_path_to_theme_conf}"
+
+  getiTermEscapeSequence ${full_path_to_theme_conf}
 }
+
 
 listThemes() {
   # List all the themes
