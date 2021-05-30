@@ -1,3 +1,9 @@
+# For making a new archive of the entire project
+# To do a release: 
+# 1. ./make_release.sh <VERSION_NUMBER>
+# 2. "homebrew-tap" repo -> chit.rb -> update url string -> "...archive/chit.<VERSION_NUMBER>.tar.gz?raw=true"
+# 3. "homebrew-tap" repo -> chit.rb -> update url string -> "sha256 <SHA_FROM_GIT>"
+
 version="${1}"
 archive_name="chit.${version}.tar.gz"
 
