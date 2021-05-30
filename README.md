@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="img/colorized-icon.png" alt="chit title"><br>
+  <img src="img/colorized-icon@128.png" alt="chit title"><br>
   <b>chit</b>: For <b>ch</b>anging <b>t</b>hemes.
 </p>
 
