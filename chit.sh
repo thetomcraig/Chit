@@ -192,11 +192,11 @@ setup() {
 
   local theme_folder="${CONFIG_DIR}"/theme_definitions
   mkdir -p "${theme_folder}"
-  cp -r /usr/local/etc/chit/example_theme_definitions/* "${theme_folder}"
+  cp -r ./example_theme_definitions/* "${theme_folder}"
 
   local kitty_theme_folder="${CONFIG_DIR}"/kitty_themes
   mkdir -p "${kitty_theme_folder}"
-  cp -r /usr/local/etc/chit/kitty_themes/* "${kitty_theme_folder}"
+  cp -r ./kitty_themes/* "${kitty_theme_folder}"
 
   touch ${CONFIG_DIR}/tmux_theme.conf
   setSavedSetting "${CONFIG_DIR}"/tmux_theme.conf ""
