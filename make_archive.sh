@@ -17,6 +17,8 @@ git add version
 git commit -m "Add version ${version} archive"
 git push
 
-echo "PUSHED VERSION:${version}"
+echo "\n"
+echo "\n"
+echo "PUSHED VERSION: ${version}"
 echo "COPY BELOW CHECKSUM TO CLIPBOARD:"
 echo $(shasum -a 256 archive/"${archive_name}" | awk '{print $1}')
