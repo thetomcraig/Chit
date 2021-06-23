@@ -1,6 +1,0 @@
-#!/usr/bin/env bash
-
-CONFIG_DIR="${HOME}/.config/chit"
-
-mkdir -p "${CONFIG_DIR}"
-mkdir -p "${CONFIG_DIR}/theme_definitions"
