@@ -274,7 +274,7 @@ helpStringFunction() {
   echo "  e|export-env-vars:
       Export variables set by the current theme.
       To be called with an 'eval' command."
-  echo "  l|list-themes:
+  echo "  l|list:
       List available themes."
   echo "  s|set-theme theme_name:
       Set the current theme to theme_name."
@@ -296,7 +296,7 @@ case $1 in
   e|export-env-vars)
     exportEnvVars
   ;;
-  l|list-themes)
+  l|list)
     listThemes
   ;;
   s|set-theme)
