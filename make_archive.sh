@@ -10,7 +10,10 @@ archive_name="chit.${version}.tar.gz"
 tar -zcvf "${archive_name}" chit.sh build iterm example_theme_definitions kitty_themes configure
 mv "${archive_name}" archive
 
+echo "${version}" > version
+
 git add archive
+git add version
 git commit -m "Add version ${version} archive"
 git push
 
