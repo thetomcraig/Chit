@@ -12,6 +12,7 @@
   <a href="#how-to-use">How To Use</a> •
   <a href="#how-it-works">How it Works</a><br>
   <a href="#installation">Installation</a> •
+  <a href="#uninstallation">Uninstallation</a> •
   <a href="#adding-themes">Adding Themes</a> •
   <a href="#credits-and-license">Credits and License
 </a>
@@ -88,13 +89,18 @@ cs() {
 
 ```
 
-3. Setup `chit`:
- 
+### Uninstallation
+You can uninstall by using the normal brew command:
+
 ```bash
-> chit setup
+> brew uninstall chit
 ```
 
-This will setup everything you need in the config directory, `~/.config/chit`.  Including the [example themes](example_theme_definitions).
+You may also wish to remove the configuration files thusly:
+
+```bash
+> rm -rf ~/.config/chit
+```
 
 ### Integrations
 
