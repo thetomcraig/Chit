@@ -11,7 +11,7 @@ THEME_EXAMPLE_FOLDER="${CONFIG_DIR}/theme_definitions/examples"
 mkdir -p "${THEME_EXAMPLE_FOLDER}"
 
 # Create current_theme file
-touch "${configFolder}"/current_theme
+touch "${CONFIG_DIR}"/current_theme
 
 # Copy over the example stuff
-cp -r theme_definitions/examples/* "${THEME_EXAMPLE_FOLDER}"
+cp -r example_theme_definitions/* "${THEME_EXAMPLE_FOLDER}"
