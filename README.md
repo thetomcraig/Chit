@@ -133,6 +133,10 @@ tmux source-file ~/.tmux.conf
 ### Adding Themes
 TODO
 
+### Uninstallation
+- remove with brew
+- remove the lines from your profile
+
 ### Credits and License
 #### Icons
 <div>Icons made by <a href="https://www.flaticon.com/authors/smashicons" title="Smashicons">Smashicons</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a></div>

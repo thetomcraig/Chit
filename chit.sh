@@ -139,7 +139,7 @@ exitIfFileDoesNotExist() {
   # If no file exists at that location, throw an error and exit
   full_path_string="${CONFIG_DIR}/theme_definitions/${1}.conf"
   if ! [[ -f "${full_path_string}" ]]; then
-    >&2 echo "There is no chit theme with the name: ${theme_name}"
+    >&2 echo "There is no chit theme with the name: '${theme_name}'"
     exit 1
   fi
 }
@@ -205,15 +205,25 @@ setup() {
 shellInit() {
   # To be run on shell start (.bash_profile .zshrc etc.)
   # With the line: eval "$(chit shell-init)"
+
+  # If we determine the setup not was run,
+  # do the setup manually now
+  echo "checking"
+  echo "${CONFIG_DIR}"
+  if [ ! -d "${CONFIG_DIR}" ]; then
+      setup
+  fi 
+
   theme_name=$(getSavedSetting ${CONFIG_DIR}/current_theme)
 
-  exitIfFileDoesNotExist "${theme_name}"
+  # not needed
+  #exitIfFileDoesNotExist "${theme_name}"
 
   full_path_to_theme_conf=$(getFullPathToThemeFile "${theme_name}")
 
-  exportEnvVars
+   exportEnvVars
 
-  getiTermEscapeSequence ${full_path_to_theme_conf}
+  # getiTermEscapeSequence ${full_path_to_theme_conf}
 }
 
 
