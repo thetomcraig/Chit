@@ -12,6 +12,8 @@ mkdir -p "${THEME_EXAMPLE_FOLDER}"
 
 # Create current_theme file
 touch "${CONFIG_DIR}"/current_theme
+echo "default" > "${CONFIG_DIR}"/current_theme
+echo "testing"
 
 # Copy over the example stuff
-cp -r ./example_theme_definitions/* "${THEME_EXAMPLE_FOLDER}"
+cp -r ./example_theme_definitions/dark.conf "${THEME_EXAMPLE_FOLDER}"/drk.conf
