@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
 
-# Homebrew build/install steps will make and populate this folder
 CONFIG_DIR=${HOME}/.config/chit
 TMUX_LINES_PATH="${CONFIG_DIR}/tmux_lines.conf"
 
@@ -11,9 +10,6 @@ TMUX_LINES_PATH="${CONFIG_DIR}/tmux_lines.conf"
 KITTY_THEME_CONF_PATH="${HOME}/.config/kitty/theme.conf"
 
 
-##################
-# SETTINGS UTILS #
-##################
 getSavedSetting() {
   setting_file_name="${1}"
 
@@ -36,9 +32,6 @@ setSavedSetting() {
 }
 
 
-##################
-# TERMINAL UTILS #
-##################
 getTerminalEmulator() {
   # Name of the current terminal emulator application
   terminal_emulator=$(osascript -e 'tell application "System Events"' \
@@ -91,7 +84,8 @@ setiTermTheme() {
     osascript ${CONFIG_DIR}/iterm/change_iterm_session.scpt "${scheme}" &> /dev/null
   else
     # Otherwise, we can use the iTerm escape sequence
-    eval `getiTermEscapeSequence "${full_path_to_theme_conf}"`
+    sequence=$(getiTermEscapeSequence "${full_path_to_theme_conf}")
+    eval "${sequence}"
   fi
 }
 
@@ -174,13 +168,8 @@ exportEnvVars() {
   theme_name=$(getSavedSetting ${CONFIG_DIR}/current_theme)
   exitIfFileDoesNotExist "${theme_name}"
   full_path_to_theme_conf=$(getFullPathToThemeFile "${theme_name}")
-  # Loop through the lines in the theme file.
-  # For each, echo:
-  #   export line
-  # When this function is eval-ed it sets all the variables as environment variables
-  while read i; do
-    echo export "${i}"
-  done < ${full_path_to_theme_conf}
+  bat_theme=$(getThemeVariable $full_path_to_theme_conf "BAT_THEME")
+  echo "export BAT_THEME=${bat_theme}"
 }
 
 setup() {
@@ -195,7 +184,7 @@ setup() {
   mkdir -p "${config_theme_folder}"
   local version=$(cat ./version)
   local share_folder="/usr/local/Cellar/chit/${version}/share"
-  cp -r "${share_folder}/example_theme_definitions/*" "${config_theme_folder}"
+  cp ${share_folder}/example_theme_definitions/* ${config_theme_folder}
 
   # TODO fix this up
   # local kitty_theme_folder="${CONFIG_DIR}"/kitty_themes
@@ -213,24 +202,23 @@ shellInit() {
   # Because this function is called every time the shell starts,
   # We need to have chit setup, and if there is an issue, fail loud and early
   if [ ! -d "${CONFIG_DIR}" ] || [ ! -f "${CONFIG_DIR}/current_theme" ]; then
-      echo "chit running first-time setup"
+      echo "echo chit running first-time setup"
       setup
   fi 
 
-  theme_name=$(getSavedSetting "${CONFIG_DIR}/current_theme")
-  if [ -z "$pass_tc11" ]; then
-    >&2 echo "chit error: No current theme set!"
+  theme_name=$(getSavedSetting ${CONFIG_DIR}/current_theme)
+  if [ -z "$theme_name" ]; then
+    echo "echo chit error: No current theme set!"
     exit 1
   fi
 
-  # not needed ?
-  #exitIfFileDoesNotExist "${theme_name}"
+  exitIfFileDoesNotExist "${theme_name}"
 
-  # full_path_to_theme_conf=$(getFullPathToThemeFile "${theme_name}")
+  full_path_to_theme_conf=$(getFullPathToThemeFile "${theme_name}")
 
-  # exportEnvVars
+  exportEnvVars
 
-  # getiTermEscapeSequence ${full_path_to_theme_conf}
+  getiTermEscapeSequence ${full_path_to_theme_conf}
 }
 
 
@@ -273,7 +261,8 @@ setTheme() {
 
   exitIfFileDoesNotExist "${theme_name}"
   full_path_to_theme_conf=$(getFullPathToThemeFile "${theme_name}")
-  # Not calling exportEnvVars here, because it would not affect the parent shell process
+  # Not calling exportEnvVars here,
+  # because it would not affect the parent shell process
   setTerminalTheme "${full_path_to_theme_conf}"
   setSavedSetting "${CONFIG_DIR}"/current_theme "${theme_name}"
   writeTmuxLinesToFile "${full_path_to_theme_conf}"
