@@ -1,20 +1,16 @@
 #!/usr/bin/env bash
 
 cp chit.sh chit
-cp chit.sh chit2
 
-CONFIG_DIR="${HOME}/.config/chit"
+# CONFIG_DIR="${HOME}/.config/chit"
 
-# Make necessary directories
-mkdir -p "${CONFIG_DIR}"
-mkdir -p "${CONFIG_DIR}/theme_definitions"
-THEME_EXAMPLE_FOLDER="${CONFIG_DIR}/theme_definitions/examples"
-mkdir -p "${THEME_EXAMPLE_FOLDER}"
+# mkdir -p "${CONFIG_DIR}"
+# mkdir -p "${CONFIG_DIR}/theme_definitions"
+# THEME_EXAMPLE_FOLDER="${CONFIG_DIR}/theme_definitions/examples"
+# mkdir -p "${THEME_EXAMPLE_FOLDER}"
 
-# Create current_theme file
-touch "${CONFIG_DIR}"/current_theme
-echo "default" > "${CONFIG_DIR}"/current_theme
-echo "testing"
+# touch "${CONFIG_DIR}"/current_theme
+# echo "default" > "${CONFIG_DIR}"/current_theme
+# echo "testing"
 
-# Copy over the example stuff
-cp -r ./example_theme_definitions/dark.conf "${THEME_EXAMPLE_FOLDER}"/dark.conf
+# cp -r ./example_theme_definitions/dark.conf "${THEME_EXAMPLE_FOLDER}"/dark.conf
