@@ -184,19 +184,23 @@ exportEnvVars() {
 }
 
 setup() {
-  # Create the config files in ~/.config/chit
-  # Copy example theme files to this directory
+  # First time setup
+  # If chit is invoked and the setup has not been run,
+  # We will set up manually
   mkdir -p "${CONFIG_DIR}"
   touch "${CONFIG_DIR}"/current_theme
   setSavedSetting "${CONFIG_DIR}"/current_theme "dark"
 
-  local theme_folder="${CONFIG_DIR}"/theme_definitions
-  mkdir -p "${theme_folder}"
-  cp -r ./example_theme_definitions/* "${theme_folder}"
+  local config_theme_folder="${CONFIG_DIR}"/theme_definitions
+  mkdir -p "${config_theme_folder}"
+  local version=$(cat ./version)
+  local share_folder="/usr/local/Cellar/chit/${version}/share"
+  cp -r "${share_folder}/example_theme_definitions/*" "${config_theme_folder}"
 
-  local kitty_theme_folder="${CONFIG_DIR}"/kitty_themes
-  mkdir -p "${kitty_theme_folder}"
-  cp -r ./kitty_themes/* "${kitty_theme_folder}"
+  # TODO fix this up
+  # local kitty_theme_folder="${CONFIG_DIR}"/kitty_themes
+  # mkdir -p "${kitty_theme_folder}"
+  # cp -r ./kitty_themes/* "${kitty_theme_folder}"
 
   touch ${CONFIG_DIR}/tmux_theme.conf
   setSavedSetting "${CONFIG_DIR}"/tmux_theme.conf ""
@@ -206,22 +210,25 @@ shellInit() {
   # To be run on shell start (.bash_profile .zshrc etc.)
   # With the line: eval "$(chit shell-init)"
 
-  # If we determine the setup not was run,
-  # do the setup manually now
-  echo "checking"
-  echo "${CONFIG_DIR}"
-  if [ ! -d "${CONFIG_DIR}" ]; then
+  # Because this function is called every time the shell starts,
+  # We need to have chit setup, and if there is an issue, fail loud and early
+  if [ ! -d "${CONFIG_DIR}" ] || [ ! -f "${CONFIG_DIR}/current_theme" ]; then
+      echo "chit running first-time setup"
       setup
   fi 
 
-  theme_name=$(getSavedSetting ${CONFIG_DIR}/current_theme)
+  theme_name=$(getSavedSetting "${CONFIG_DIR}/current_theme")
+  if [ -z "$pass_tc11" ]; then
+    >&2 echo "chit error: No current theme set!"
+    exit 1
+  fi
 
-  # not needed
+  # not needed ?
   #exitIfFileDoesNotExist "${theme_name}"
 
-  full_path_to_theme_conf=$(getFullPathToThemeFile "${theme_name}")
+  # full_path_to_theme_conf=$(getFullPathToThemeFile "${theme_name}")
 
-   exportEnvVars
+  # exportEnvVars
 
   # getiTermEscapeSequence ${full_path_to_theme_conf}
 }
