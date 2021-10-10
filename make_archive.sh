@@ -7,7 +7,7 @@
 version="${1}"
 archive_name="chit.${version}.tar.gz"
 
-tar -zcvf "${archive_name}" chit.sh iterm example_theme_definitions kitty_themes
+tar -zcvf "${archive_name}" chit.sh iterm example_theme_definitions kitty_themes version
 mv "${archive_name}" archive
 
 echo "${version}" > version
