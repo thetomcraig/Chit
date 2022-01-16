@@ -1,6 +1,11 @@
 #!/usr/bin/env bash
 
-CONFIG_DIR=${HOME}/.config/chit
+VERSION=$(ls /usr/local/Cellar/chit/)
+
+CONFIG_DIR="${HOME}/.config/chit"
+CONFIG_THEME_DIR="${CONFIG_DIR}/theme_definitions"
+SHARE_DIR="/usr/local/Cellar/chit/${VERSION}/share"
+
 TMUX_LINES_PATH="${CONFIG_DIR}/tmux_lines.conf"
 
 # This is the file kitty will source to apply colors
@@ -81,7 +86,7 @@ setiTermTheme() {
   if [ -n "$TMUX" ]; then
     # If inside tmux, need to use the applescript to
     # Set all the colors
-    osascript ${CONFIG_DIR}/iterm/change_iterm_session.scpt "${scheme}" &> /dev/null
+    osascript "${SHARE_DIR}/iterm/change_iterm_session.scpt" "${scheme}"
   else
     # Otherwise, we can use the iTerm escape sequence
     sequence=$(getiTermEscapeSequence "${full_path_to_theme_conf}")
@@ -180,11 +185,8 @@ setup() {
   touch "${CONFIG_DIR}"/current_theme
   setSavedSetting "${CONFIG_DIR}"/current_theme "dark"
 
-  local config_theme_folder="${CONFIG_DIR}"/theme_definitions
-  mkdir -p "${config_theme_folder}"
-  local version=$(cat ./version)
-  local share_folder="/usr/local/Cellar/chit/${version}/share"
-  cp ${share_folder}/example_theme_definitions/* ${config_theme_folder}
+  mkdir -p "${CONFIG_THEME_DIR}"
+  cp ${SHARE_DIR}/example_theme_definitions/* ${CONFIG_THEME_DIR}
 
   # TODO fix this up
   # local kitty_theme_folder="${CONFIG_DIR}"/kitty_themes
@@ -269,6 +271,7 @@ setTheme() {
   echo "Theme set to: ${theme_name}"
 }
 
+
 helpStringFunction() {
   echo "chit usage:"
   echo "  h|help:
@@ -286,6 +289,8 @@ helpStringFunction() {
       Set the current theme to theme_name."
   echo "  c|get-current-theme:
       Show the name of the current theme."
+  echo "  v|version:
+      Show the version of chit installed."
   echo "  g|get-theme-variable variable_name [theme_name]:
       Show value of variable_name in theme_name.
       If theme_name not supplied, use the current theme."
@@ -318,6 +323,9 @@ case $1 in
     fi
     full_path_to_theme_conf=$(getFullPathToThemeFile "${theme}")
     getThemeVariable $full_path_to_theme_conf $2
+  ;;
+  v|version)
+    echo ${VERSION}
   ;;
   h*|help)
     helpStringFunction
