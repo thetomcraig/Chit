@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 
-VERSION=$(ls /usr/local/Cellar/chit/)
-
+# Paths and metadata used later on
+INSTALL_DIR=$(brew info chit | head -4 | tail -n 1 | awk '{ print $1 }')
+VERSION=$(brew info --json chit | grep "\"version\":" | awk '{ print $2 }' | tr -d \" | tr -d ,)
 CONFIG_DIR="${HOME}/.config/chit"
 CONFIG_THEME_DIR="${CONFIG_DIR}/theme_definitions"
-SHARE_DIR="/usr/local/Cellar/chit/${VERSION}/share"
-
+SHARE_DIR="${INSTALL_DIR}/share"
 TMUX_LINES_PATH="${CONFIG_DIR}/tmux_lines.conf"
 
 # This is the file kitty will source to apply colors
