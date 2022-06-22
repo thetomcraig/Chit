@@ -193,8 +193,9 @@ setup() {
   # mkdir -p "${kitty_theme_folder}"
   # cp -r ./kitty_themes/* "${kitty_theme_folder}"
 
-  touch ${CONFIG_DIR}/tmux_theme.conf
-  setSavedSetting "${CONFIG_DIR}"/tmux_theme.conf ""
+  # TMUX
+  # touch ${CONFIG_DIR}/tmux_theme.conf
+  # setSavedSetting "${CONFIG_DIR}"/tmux_theme.conf ""
 }
 
 shellInit() {
@@ -253,7 +254,8 @@ writeTmuxLinesToFile() {
     # single quotes should be around this line
     # So remove them
     # TODO: should probably replace this with something like TOML for conf files
-    echo "${line:1:-1}" >> "${TMUX_LINES_PATH}"
+    # echo "${line:1:-1}" >> "${TMUX_LINES_PATH}"
+    echo "inside tmux"
   done
   IFS=IFS_ORG
 }
@@ -267,7 +269,7 @@ setTheme() {
   # because it would not affect the parent shell process
   setTerminalTheme "${full_path_to_theme_conf}"
   setSavedSetting "${CONFIG_DIR}"/current_theme "${theme_name}"
-  writeTmuxLinesToFile "${full_path_to_theme_conf}"
+  # writeTmuxLinesToFile "${full_path_to_theme_conf}"
   echo "Theme set to: ${theme_name}"
 }
 
