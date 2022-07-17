@@ -177,6 +177,7 @@ exportEnvVars() {
   echo "export BAT_THEME=${bat_theme}"
 }
 
+
 setup() {
   # First time setup
   # If chit is invoked and the setup has not been run,
@@ -306,7 +307,10 @@ case $1 in
   i|shell-init)
     shellInit
   ;;
-  e|export-env-vars)
+  e|edit)
+    $EDITOR "${CONFIG_THEME_DIR}/${2}.conf"
+  ;;
+  x|export-env-vars)
     exportEnvVars
   ;;
   l|list)
